@@ -1,0 +1,6 @@
+## Interface: 20400
+## Author: Rothar
+## Title: Filter
+## Notes: addon of awesomeness...lol
+
+Filter.lua
