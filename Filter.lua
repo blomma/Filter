@@ -108,8 +108,9 @@ local UpdateAura = function(name, unit, button)
 end
 
 local UpdateCooldown = function(name, button)
-	if button.visible then return end
-	local start, duration, _ = GetSpellCooldown(name)
+	local start, duration, enable = GetSpellCooldown(name)
+	
+	if button.visible and enable == 1 then return end
 	if duration > 1.5 then
 		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
 		button.cd:SetCooldown(start, duration)
