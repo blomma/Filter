@@ -40,7 +40,7 @@ local onUpdate = function(self, elapsed)
 	totalelapsed = totalelapsed + elapsed
 	if totalelapsed < 1 then return end
 	if GetTime() >= self.expire then
-		self.cooling = nil
+		self.visible = nil
 		self:Hide()
 	end
 	totalelapsed = 0
@@ -87,7 +87,7 @@ end
 local UpdateAura = function(name, unit, button)
 	local name, rank, texture, count, debuffType, duration, expirationTime, isMine, isStealable = UnitAura(unit, name)
 
-	if expirationTime then
+	if expirationTime and button.visible == nil then
 		if(duration and duration > 0) then
 			button.cd:SetCooldown(expirationTime - duration, duration)
 			button.cd:Show()
@@ -99,22 +99,25 @@ local UpdateAura = function(name, unit, button)
 		button.icon:SetTexCoord(.07, .93, .07, .93)
 		button.count:SetText((count > 1 and count))
 
+		button.visible = true
 		button:Show()
 	else
+		button.visible = nil
 		button:Hide()
 	end
 end
 
 local UpdateCooldown = function(name, button)
-	if button.cooling then return end
+	if button.visible then return end
 	local start, duration, _ = GetSpellCooldown(name)
 	if duration > 1.5 then
 		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
 		button.cd:SetCooldown(start, duration)
 		button.expire = start + duration
-		button.cooling = true
 		button.icon:SetTexture(icon)
 		button.icon:SetTexCoord(.07, .93, .07, .93)
+
+		button.visible = true
 		button:Show()
 	end
 end
