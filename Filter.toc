@@ -1,6 +1,7 @@
-## Interface: 20400
-## Author: Rothar
-## Title: Filter
-## Notes: addon of awesomeness...lol
+## Title: CombatLog
+## Interface: 30800
+## Notes: Aura watcher
+## Author: Fleetfoot
+## Version: 1.0
 
 Filter.lua
