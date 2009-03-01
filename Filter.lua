@@ -1,3 +1,16 @@
+--[[
+
+	Filter
+
+	Author:		Fleetfoot
+	Mail:		blomma@gmail.com
+
+	Credits:	Rothar and rFilter2
+
+	This is pretty much a recode of rFilter2, in the process i removed some of the options, like testmode and setting
+	framestrata, anchor, fontSize. It also depends soley on omniCC to set timeleft on the icons.
+--]]
+
 Filter = CreateFrame("Frame")
 Filter:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, ...) end end)
 Filter:RegisterEvent("PLAYER_LOGIN")
@@ -7,28 +20,30 @@ local print = function(a) ChatFrame1:AddMessage("|cff33ff99Filter:|r "..tostring
 local playerName, _ = UnitName("player")
 local _, playerClass = UnitClass("player")
 local spellList
+local GetTime = GetTime
 
 if playerName == "Fleetfoot" and playerClass == "HUNTER" then
 	spellList = {
 		auras = {
 			{ name = "Aspect of the Viper", unit = "player", size = 50, posx = -380, posy = -60 },
-			{ name = "Lock and Load", unit = "player", size = 50, posx = -300, posy = -60 },
+			{ name = "Lock and Load", unit = "player", size = 45, posx = -180, posy = -158 },
 		},
 		cooldowns = {
-			{ name = "Kill Command", unit = "player", size = 50, posx = -500, posy = -60 },
-			{ name = "Rapid Fire", unit = "player", size = 50, posx = -500, posy = -60 },
+			{ name = "Kill Command", unit = "player", size = 40, posx = -550, posy = -60 },
+			-- { name = "Rapid Fire", unit = "player", size = 40, posx = -500, posy = -60 },
 		},
 	}
 end
 
+local totalelapsed = 0
 local onUpdate = function(self, elapsed)
-	local duration = self.duration + elapsed
-	if duration >= self.expire then
-		self.duration = nil
+	totalelapsed = totalelapsed + elapsed
+	if totalelapsed < 1 then return end
+	if GetTime() >= self.expire then
+		self.cooling = nil
 		self:Hide()
-	else
-		self.duration = duration
 	end
+	totalelapsed = 0
 end
 
 local CreateIcon = function(spellName, unit, size, posX, posY, type )
@@ -59,11 +74,11 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 	overlay:SetVertexColor(.31,.41,.53)
 	overlay:SetBlendMode("BLEND")
 	
-	button.overlay = overlay
-
+	button.name = spellName
+	button.cd = cd
 	button.icon = icon
 	button.count = count
-	button.cd = cd
+	button.overlay = overlay
 	button:Hide()
 	
 	return button
@@ -75,6 +90,7 @@ local UpdateAura = function(name, unit, button)
 	if expirationTime then
 		if(duration and duration > 0) then
 			button.cd:SetCooldown(expirationTime - duration, duration)
+			button.cd:Show()
 		else
 			button.cd:Hide()
 		end
@@ -89,22 +105,21 @@ local UpdateAura = function(name, unit, button)
 	end
 end
 
-local CheckCooldown = function(name, button)
-	if button.duration then return end
-
-	local start, duration, _ = GetSpellCooldown(name);
-	if duration > 0 then
+local UpdateCooldown = function(name, button)
+	if button.cooling then return end
+	local start, duration, _ = GetSpellCooldown(name)
+	if duration > 1.5 then
 		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
 		button.cd:SetCooldown(start, duration)
-		button.expire = duration + start
-		button.duration = start
+		button.expire = start + duration
+		button.cooling = true
 		button.icon:SetTexture(icon)
 		button.icon:SetTexCoord(.07, .93, .07, .93)
 		button:Show()
 	end
 end
 
-function Filter:PLAYER_LOGIN(delayed)
+function Filter:PLAYER_LOGIN()
 	self:UnregisterEvent("PLAYER_LOGIN")
 	for _,value in ipairs(spellList.auras) do
 		value.button = CreateIcon(value.name, value.unit, value.size, value.posx, value.posy, "aura" )
@@ -114,6 +129,7 @@ function Filter:PLAYER_LOGIN(delayed)
 	end
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 
 function Filter:UNIT_AURA(unit)
@@ -126,8 +142,18 @@ function Filter:UNIT_AURA(unit)
 	end
 end
 
-function Filter:SPELL_UPDATE_COOLDOWN(arg1)
+function Filter:SPELL_UPDATE_COOLDOWN()
 	for _,value in ipairs(spellList.cooldowns) do
-		CheckCooldown(value.name, value.button)
+		UpdateCooldown(value.name, value.button)
+	end
+end
+
+function Filter:PLAYER_ENTERING_WORLD()
+	for _,value in ipairs(spellList.auras) do
+		UpdateAura(value.name, value.unit, value.button)
+	end
+
+	for _,value in ipairs(spellList.cooldowns) do
+		UpdateCooldown(value.name, value.button)
 	end
 end

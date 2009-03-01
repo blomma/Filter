@@ -1,6 +1,6 @@
-## Title: CombatLog
+## Title: Filter
 ## Interface: 30800
-## Notes: Aura watcher
+## Notes: Aura/Cooldown watcher
 ## Author: Fleetfoot
 ## Version: 1.0
 
