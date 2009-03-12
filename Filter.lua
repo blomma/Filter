@@ -30,10 +30,14 @@ if playerName == "Fleetfoot" and playerClass == "HUNTER" then
 		},
 		cooldowns = {
 			{ name = "Kill Command", unit = "player", size = 40, posx = -550, posy = -60 },
-			-- { name = "Rapid Fire", unit = "player", size = 40, posx = -500, posy = -60 },
+			{ name = "Call of the Wild", unit = "player", size = 40, posx = -550, posy = -110 },
+			{ name = "Rapid Fire", unit = "player", size = 40, posx = -550, posy = -160 },
 		},
 	}
 end
+
+local aurasCount = #spellList.auras
+local cooldownsCount = #spellList.cooldowns
 
 local totalelapsed = 0
 local onUpdate = function(self, elapsed)
@@ -87,8 +91,8 @@ end
 local UpdateAura = function(name, unit, button)
 	local name, rank, texture, count, debuffType, duration, expirationTime, isMine, isStealable = UnitAura(unit, name)
 
-	if expirationTime and button.visible == nil then
-		if(duration and duration > 0) then
+	if duration then
+		if(duration > 0) then
 			button.cd:SetCooldown(expirationTime - duration, duration)
 			button.cd:Show()
 		else
@@ -110,8 +114,8 @@ end
 local UpdateCooldown = function(name, button)
 	local start, duration, enable = GetSpellCooldown(name)
 	
-	if button.visible and enable == 1 then return end
-	if duration > 1.5 then
+	if enable == 1 then return end
+	if duration and duration > 1.5 then
 		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
 		button.cd:SetCooldown(start, duration)
 		button.expire = start + duration
@@ -125,10 +129,14 @@ end
 
 function Filter:PLAYER_LOGIN()
 	self:UnregisterEvent("PLAYER_LOGIN")
-	for _,value in ipairs(spellList.auras) do
+	for i=1, aurasCount do
+		local value = spellList.auras[i]
+	--for _,value in ipairs(spellList.auras) do
 		value.button = CreateIcon(value.name, value.unit, value.size, value.posx, value.posy, "aura" )
 	end
-	for _,value in ipairs(spellList.cooldowns) do
+	for i=1, cooldownsCount do
+		local value = spellList.cooldowns[i]
+	--for _,value in ipairs(spellList.cooldowns) do
 		value.button = CreateIcon(value.name,  value.unit, value.size, value.posx, value.posy, "cooldown" )
 	end
 	self:RegisterEvent("UNIT_AURA")
@@ -139,7 +147,9 @@ end
 function Filter:UNIT_AURA(unit)
 	if unit ~= "player" then return end
 
-	for _,value in ipairs(spellList.auras) do
+	for i=1, aurasCount do
+		local value = spellList.auras[i]
+	--for _,value in ipairs(spellList.auras) do
 		if value.unit == unit then
 			UpdateAura(value.name, value.unit, value.button)
 		end
@@ -147,17 +157,23 @@ function Filter:UNIT_AURA(unit)
 end
 
 function Filter:SPELL_UPDATE_COOLDOWN()
-	for _,value in ipairs(spellList.cooldowns) do
+	for i=1, cooldownsCount do
+		local value = spellList.cooldowns[i]
+	--for _,value in ipairs(spellList.cooldowns) do
 		UpdateCooldown(value.name, value.button)
 	end
 end
 
 function Filter:PLAYER_ENTERING_WORLD()
-	for _,value in ipairs(spellList.auras) do
+	for i=1, aurasCount do
+		local value = spellList.auras[i]
+	--for _,value in ipairs(spellList.auras) do
 		UpdateAura(value.name, value.unit, value.button)
 	end
 
-	for _,value in ipairs(spellList.cooldowns) do
+	for i=1, cooldownsCount do
+		local value = spellList.cooldowns[i]
+	--for _,value in ipairs(spellList.cooldowns) do
 		UpdateCooldown(value.name, value.button)
 	end
 end
