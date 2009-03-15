@@ -114,7 +114,7 @@ end
 local UpdateCooldown = function(name, button)
 	local start, duration, enable = GetSpellCooldown(name)
 	
-	if enable == 1 then return end
+	if button.visible and enable == 1 then return end
 	if duration and duration > 1.5 then
 		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
 		button.cd:SetCooldown(start, duration)
