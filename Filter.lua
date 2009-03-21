@@ -32,6 +32,7 @@ if playerName == "Fleetfoot" and playerClass == "HUNTER" then
 			{ name = "Kill Command", unit = "player", size = 40, posx = -550, posy = -60 },
 			{ name = "Call of the Wild", unit = "player", size = 40, posx = -550, posy = -110 },
 			{ name = "Rapid Fire", unit = "player", size = 40, posx = -550, posy = -160 },
+			{ name = "Feign Death", unit = "player", size = 40, posx = -550, posy = -210 },
 		},
 	}
 end
@@ -89,8 +90,7 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 end
 
 local UpdateAura = function(name, unit, button)
-	local name, rank, texture, count, debuffType, duration, expirationTime, isMine, isStealable = UnitAura(unit, name)
-
+	local _, _, texture, count, _, duration, expirationTime, _, _ = UnitAura(unit, name)
 	if duration then
 		if(duration > 0) then
 			button.cd:SetCooldown(expirationTime - duration, duration)
@@ -131,12 +131,10 @@ function Filter:PLAYER_LOGIN()
 	self:UnregisterEvent("PLAYER_LOGIN")
 	for i=1, aurasCount do
 		local value = spellList.auras[i]
-	--for _,value in ipairs(spellList.auras) do
 		value.button = CreateIcon(value.name, value.unit, value.size, value.posx, value.posy, "aura" )
 	end
 	for i=1, cooldownsCount do
 		local value = spellList.cooldowns[i]
-	--for _,value in ipairs(spellList.cooldowns) do
 		value.button = CreateIcon(value.name,  value.unit, value.size, value.posx, value.posy, "cooldown" )
 	end
 	self:RegisterEvent("UNIT_AURA")
@@ -149,7 +147,6 @@ function Filter:UNIT_AURA(unit)
 
 	for i=1, aurasCount do
 		local value = spellList.auras[i]
-	--for _,value in ipairs(spellList.auras) do
 		if value.unit == unit then
 			UpdateAura(value.name, value.unit, value.button)
 		end
@@ -159,7 +156,6 @@ end
 function Filter:SPELL_UPDATE_COOLDOWN()
 	for i=1, cooldownsCount do
 		local value = spellList.cooldowns[i]
-	--for _,value in ipairs(spellList.cooldowns) do
 		UpdateCooldown(value.name, value.button)
 	end
 end
@@ -167,13 +163,11 @@ end
 function Filter:PLAYER_ENTERING_WORLD()
 	for i=1, aurasCount do
 		local value = spellList.auras[i]
-	--for _,value in ipairs(spellList.auras) do
 		UpdateAura(value.name, value.unit, value.button)
 	end
 
 	for i=1, cooldownsCount do
 		local value = spellList.cooldowns[i]
-	--for _,value in ipairs(spellList.cooldowns) do
 		UpdateCooldown(value.name, value.button)
 	end
 end
