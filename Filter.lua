@@ -33,6 +33,9 @@ if playerName == "Fleetfoot" and playerClass == "HUNTER" then
 			{ name = "Call of the Wild", unit = "player", size = 40, posx = -550, posy = -110 },
 			{ name = "Rapid Fire", unit = "player", size = 40, posx = -550, posy = -160 },
 			{ name = "Feign Death", unit = "player", size = 40, posx = -550, posy = -210 },
+			{ name = "Explosive Shot", unit = "player", size = 35, posx = 160, posy = 60 },
+			{ name = "Kill Shot", unit = "player", size = 35, posx = 160, posy = 15 },
+			{ name = "Black Arrow", unit = "player", size = 35, posx = 160, posy = -30 },
 		},
 	}
 end
@@ -40,15 +43,14 @@ end
 local aurasCount = #spellList.auras
 local cooldownsCount = #spellList.cooldowns
 
-local totalelapsed = 0
 local onUpdate = function(self, elapsed)
-	totalelapsed = totalelapsed + elapsed
-	if totalelapsed < 1 then return end
+	self.elapsed = self.elapsed + elapsed
+	if self.elapsed < 1 then return end
 	if GetTime() >= self.expire then
 		self.visible = nil
 		self:Hide()
 	end
-	totalelapsed = 0
+	self.elapsed = 0
 end
 
 local CreateIcon = function(spellName, unit, size, posX, posY, type )
@@ -121,7 +123,7 @@ local UpdateCooldown = function(name, button)
 		button.expire = start + duration
 		button.icon:SetTexture(icon)
 		button.icon:SetTexCoord(.07, .93, .07, .93)
-
+		button.elapsed = 0
 		button.visible = true
 		button:Show()
 	end
