@@ -45,7 +45,7 @@ local cooldownsCount = #spellList.cooldowns
 
 local onUpdate = function(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
-	if self.elapsed < 1 then return end
+	if self.elapsed < 0.1 then return end
 	if GetTime() >= self.expire then
 		self.visible = nil
 		self:Hide()
