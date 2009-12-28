@@ -1,5 +1,4 @@
 --[[
-
 	Filter
 
 	Author:		Fleetfoot
@@ -33,6 +32,7 @@ if playerName == "Fleetfoot" and playerClass == "HUNTER" then
 			{ name = "Call of the Wild", unit = "player", size = 40, posx = -550, posy = -110 },
 			{ name = "Rapid Fire", unit = "player", size = 40, posx = -550, posy = -160 },
 			{ name = "Feign Death", unit = "player", size = 40, posx = -550, posy = -210 },
+			{ name = "Intimidation", unit = "player", size = 40, posx = -550, posy = -260 },
 			{ name = "Explosive Shot", unit = "player", size = 35, posx = 160, posy = 60 },
 			{ name = "Kill Shot", unit = "player", size = 35, posx = 160, posy = 15 },
 			{ name = "Black Arrow", unit = "player", size = 35, posx = 160, posy = -30 },
@@ -61,7 +61,7 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 	button:SetWidth(size)
 	button:SetHeight(size)
 	button:SetPoint("CENTER", posX, posY)
-	
+
 	local cd = CreateFrame("Cooldown", nil, button)
 	cd:SetAllPoints(button)
 	cd:SetAlpha(0)
@@ -69,7 +69,7 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 
 	local icon = button:CreateTexture(nil, "BACKGROUND")
 	icon:SetAllPoints(button)
-	
+
 	local count = button:CreateFontString(nil, "OVERLAY")
 	count:SetFontObject(NumberFontNormal)
 	count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 0)
@@ -80,14 +80,14 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 	overlay:SetTexture("Interface\\AddOns\\Filter\\textures\\border")
 	overlay:SetVertexColor(.31,.41,.53)
 	overlay:SetBlendMode("BLEND")
-	
+
 	button.name = spellName
 	button.cd = cd
 	button.icon = icon
 	button.count = count
 	button.overlay = overlay
 	button:Hide()
-	
+
 	return button
 end
 
@@ -115,7 +115,7 @@ end
 
 local UpdateCooldown = function(name, button)
 	local start, duration, enable = GetSpellCooldown(name)
-	
+
 	if button.visible and enable == 1 then return end
 	if duration and duration > 1.5 then
 		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
