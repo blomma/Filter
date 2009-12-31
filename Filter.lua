@@ -25,6 +25,10 @@ if playerName == "Fleetfoot" and playerClass == "HUNTER" then
 	auras = {
 		{ name = "Aspect of the Viper", size = 50, posx = -380, posy = -60 },
 		{ name = "Aspect of the Dragonhawk", size = 50, posx = -380, posy = -60 },
+		{ name = "Aspect of the Beast", size = 50, posx = -380, posy = -60 },
+		{ name = "Aspect of the Cheetah", size = 50, posx = -380, posy = -60 },
+		{ name = "Aspect of the Pack", size = 50, posx = -380, posy = -60 },
+		{ name = "Aspect of the Wild", size = 50, posx = -380, posy = -60 },
 		{ name = "Lock and Load", size = 45, posx = -180, posy = -158 },
 	}
 	cooldowns = {
