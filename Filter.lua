@@ -42,7 +42,7 @@ end
 local aurasCount = #auras
 local cooldownsCount = #cooldowns
 
-local onUpdate = function(self, elapsed)
+local function onUpdate(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
 	if self.elapsed < 0.1 then return end
 	if GetTime() >= self.expire then
@@ -52,7 +52,7 @@ local onUpdate = function(self, elapsed)
 	self.elapsed = 0
 end
 
-local CreateIcon = function(spellName, size, posX, posY, type )
+local function CreateIcon(spellName, size, posX, posY, type )
 	local button = CreateFrame("Frame", nil, UIParent)
 
 	if type == "cooldown" then
@@ -96,10 +96,10 @@ local CreateIcon = function(spellName, size, posX, posY, type )
 	return button
 end
 
-local UpdateAura = function(name, unit, button)
+local function UpdateAura(name, unit, button)
 	local _, _, _, count, _, duration, expirationTime, _, _ = UnitAura(unit, name)
 	if duration then
-		if(duration > 0) then
+		if duration > 0 then
 			button.cd:SetCooldown(expirationTime - duration, duration)
 			button.cd:Show()
 		else
@@ -116,7 +116,7 @@ local UpdateAura = function(name, unit, button)
 	end
 end
 
-local UpdateCooldown = function(name, button)
+local function UpdateCooldown(name, button)
 	local start, duration, enable = GetSpellCooldown(name)
 	if button.visible and enable == 1 then return end
 
@@ -134,12 +134,12 @@ end
 function Filter:PLAYER_LOGIN()
 	self:UnregisterEvent("PLAYER_LOGIN")
 
-	for i=1, aurasCount do
+	for i = 1, aurasCount do
 		local value = auras[i]
 		value.button = CreateIcon(value.name, value.size, value.posx, value.posy, "aura")
 	end
 
-	for i=1, cooldownsCount do
+	for i = 1, cooldownsCount do
 		local value = cooldowns[i]
 		value.button = CreateIcon(value.name, value.size, value.posx, value.posy, "cooldown")
 	end
@@ -152,26 +152,26 @@ end
 function Filter:UNIT_AURA(unit)
 	if unit ~= "player" then return end
 
-	for i=1, aurasCount do
+	for i = 1, aurasCount do
 		local value = auras[i]
 		UpdateAura(value.name, unit, value.button)
 	end
 end
 
 function Filter:SPELL_UPDATE_COOLDOWN()
-	for i=1, cooldownsCount do
+	for i = 1, cooldownsCount do
 		local value = cooldowns[i]
 		UpdateCooldown(value.name, value.button)
 	end
 end
 
 function Filter:PLAYER_ENTERING_WORLD()
-	for i=1, aurasCount do
+	for i = 1, aurasCount do
 		local value = auras[i]
 		UpdateAura(value.name, "player", value.button)
 	end
 
-	for i=1, cooldownsCount do
+	for i = 1, cooldownsCount do
 		local value = cooldowns[i]
 		UpdateCooldown(value.name, value.button)
 	end
