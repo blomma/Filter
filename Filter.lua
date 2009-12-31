@@ -8,6 +8,8 @@
 
 	This is pretty much a recode of rFilter2, in the process i removed some of the options, like testmode and setting
 	framestrata, anchor, fontSize. It also depends soley on omniCC to set timeleft on the icons.
+	
+	I've also optimized it heavily based on what i wanted it to do
 --]]
 
 Filter = CreateFrame("Frame")
