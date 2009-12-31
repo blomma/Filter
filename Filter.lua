@@ -18,30 +18,29 @@ local print = function(a) ChatFrame1:AddMessage("|cff33ff99Filter:|r "..tostring
 
 local playerName, _ = UnitName("player")
 local _, playerClass = UnitClass("player")
-local spellList
+local auras, cooldowns
 local GetTime = GetTime
 
 if playerName == "Fleetfoot" and playerClass == "HUNTER" then
-	spellList = {
-		auras = {
-			{ name = "Aspect of the Viper", unit = "player", size = 50, posx = -380, posy = -60 },
-			{ name = "Lock and Load", unit = "player", size = 45, posx = -180, posy = -158 },
-		},
-		cooldowns = {
-			{ name = "Kill Command", unit = "player", size = 40, posx = -550, posy = -60 },
-			{ name = "Call of the Wild", unit = "player", size = 40, posx = -550, posy = -110 },
-			{ name = "Rapid Fire", unit = "player", size = 40, posx = -550, posy = -160 },
-			{ name = "Feign Death", unit = "player", size = 40, posx = -550, posy = -210 },
-			{ name = "Intimidation", unit = "player", size = 40, posx = -550, posy = -260 },
-			{ name = "Explosive Shot", unit = "player", size = 35, posx = 160, posy = 60 },
-			{ name = "Kill Shot", unit = "player", size = 35, posx = 160, posy = 15 },
-			{ name = "Black Arrow", unit = "player", size = 35, posx = 160, posy = -30 },
-		},
+	auras = {
+		{ name = "Aspect of the Viper", size = 50, posx = -380, posy = -60 },
+		{ name = "Aspect of the Dragonhawk", size = 50, posx = -380, posy = -60 },
+		{ name = "Lock and Load", size = 45, posx = -180, posy = -158 },
+	}
+	cooldowns = {
+		{ name = "Kill Command", size = 40, posx = -550, posy = -60 },
+		{ name = "Call of the Wild", size = 40, posx = -550, posy = -110 },
+		{ name = "Rapid Fire", size = 40, posx = -550, posy = -160 },
+		{ name = "Feign Death", size = 40, posx = -550, posy = -210 },
+		{ name = "Intimidation", size = 40, posx = -550, posy = -260 },
+		{ name = "Explosive Shot", size = 35, posx = 160, posy = 60 },
+		{ name = "Kill Shot", size = 35, posx = 160, posy = 15 },
+		{ name = "Black Arrow", size = 35, posx = 160, posy = -30 },
 	}
 end
 
-local aurasCount = #spellList.auras
-local cooldownsCount = #spellList.cooldowns
+local aurasCount = #auras
+local cooldownsCount = #cooldowns
 
 local onUpdate = function(self, elapsed)
 	self.elapsed = self.elapsed + elapsed
@@ -53,11 +52,13 @@ local onUpdate = function(self, elapsed)
 	self.elapsed = 0
 end
 
-local CreateIcon = function(spellName, unit, size, posX, posY, type )
+local CreateIcon = function(spellName, size, posX, posY, type )
 	local button = CreateFrame("Frame", nil, UIParent)
+
 	if type == "cooldown" then
 		button:SetScript("OnUpdate", onUpdate)
 	end
+
 	button:SetWidth(size)
 	button:SetHeight(size)
 	button:SetPoint("CENTER", posX, posY)
@@ -67,8 +68,12 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 	cd:SetAlpha(0)
 	cd:SetReverse()
 
+	local _, _, texture, _, _, _, _, _, _ = GetSpellInfo(spellName)
 	local icon = button:CreateTexture(nil, "BACKGROUND")
 	icon:SetAllPoints(button)
+	icon:SetTexture(texture)
+	icon:SetTexCoord(.07, .93, .07, .93)
+
 
 	local count = button:CreateFontString(nil, "OVERLAY")
 	count:SetFontObject(NumberFontNormal)
@@ -92,7 +97,7 @@ local CreateIcon = function(spellName, unit, size, posX, posY, type )
 end
 
 local UpdateAura = function(name, unit, button)
-	local _, _, texture, count, _, duration, expirationTime, _, _ = UnitAura(unit, name)
+	local _, _, _, count, _, duration, expirationTime, _, _ = UnitAura(unit, name)
 	if duration then
 		if(duration > 0) then
 			button.cd:SetCooldown(expirationTime - duration, duration)
@@ -101,8 +106,6 @@ local UpdateAura = function(name, unit, button)
 			button.cd:Hide()
 		end
 
-		button.icon:SetTexture(texture)
-		button.icon:SetTexCoord(.07, .93, .07, .93)
 		button.count:SetText((count > 1 and count))
 
 		button.visible = true
@@ -115,30 +118,32 @@ end
 
 local UpdateCooldown = function(name, button)
 	local start, duration, enable = GetSpellCooldown(name)
-
 	if button.visible and enable == 1 then return end
+
 	if duration and duration > 1.5 then
-		local _, _, icon, _, _, _, _, _, _ = GetSpellInfo(name)
 		button.cd:SetCooldown(start, duration)
 		button.expire = start + duration
-		button.icon:SetTexture(icon)
-		button.icon:SetTexCoord(.07, .93, .07, .93)
+
 		button.elapsed = 0
 		button.visible = true
 		button:Show()
 	end
 end
 
+-- Event handling
 function Filter:PLAYER_LOGIN()
 	self:UnregisterEvent("PLAYER_LOGIN")
+
 	for i=1, aurasCount do
-		local value = spellList.auras[i]
-		value.button = CreateIcon(value.name, value.unit, value.size, value.posx, value.posy, "aura" )
+		local value = auras[i]
+		value.button = CreateIcon(value.name, value.size, value.posx, value.posy, "aura")
 	end
+
 	for i=1, cooldownsCount do
-		local value = spellList.cooldowns[i]
-		value.button = CreateIcon(value.name,  value.unit, value.size, value.posx, value.posy, "cooldown" )
+		local value = cooldowns[i]
+		value.button = CreateIcon(value.name, value.size, value.posx, value.posy, "cooldown")
 	end
+
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -148,28 +153,26 @@ function Filter:UNIT_AURA(unit)
 	if unit ~= "player" then return end
 
 	for i=1, aurasCount do
-		local value = spellList.auras[i]
-		if value.unit == unit then
-			UpdateAura(value.name, value.unit, value.button)
-		end
+		local value = auras[i]
+		UpdateAura(value.name, unit, value.button)
 	end
 end
 
 function Filter:SPELL_UPDATE_COOLDOWN()
 	for i=1, cooldownsCount do
-		local value = spellList.cooldowns[i]
+		local value = cooldowns[i]
 		UpdateCooldown(value.name, value.button)
 	end
 end
 
 function Filter:PLAYER_ENTERING_WORLD()
 	for i=1, aurasCount do
-		local value = spellList.auras[i]
-		UpdateAura(value.name, value.unit, value.button)
+		local value = auras[i]
+		UpdateAura(value.name, "player", value.button)
 	end
 
 	for i=1, cooldownsCount do
-		local value = spellList.cooldowns[i]
+		local value = cooldowns[i]
 		UpdateCooldown(value.name, value.button)
 	end
 end
